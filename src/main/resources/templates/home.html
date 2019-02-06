@@ -1,0 +1,48 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Simple Wiki セットアップ</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" type="text/css">
+</head>
+<body class="base-body">
+<header class="base-header">
+    <div class="base-header-left">
+        <div class="module-sp-menu-button script-toggle-base-menu">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+        <div class="module-logo"><a th:href="@{/}">Simple Wiki</a></div>
+        <div class="module-search"></div>
+    </div>
+    <div class="base-header-right">
+    </div>
+</header>
+<main class="base-main bg-black-4"><div >
+    <div class="module-login">
+        <form th:action="@{/login}" method="post">
+            <h1>Simple Wiki SetUp</h1>
+            <div class="module-alert true" th:if="${success}">システムの初期設定が完了しました。</div>
+            <div class="module-alert" th:if="${error}" th:text="${errorMessage}"></div>
+            <p><input name="userName" placeholder="ID" type="text" class="module-input-text" /></p>
+            <p><input name="userPassword" placeholder="PASSWORD" type="password" class="module-input-text" /></p>
+            <button type="submit" class="module-submit-button">
+                ログイン
+            </button>
+        </form>
+    </div>
+</div></main>
+<footer class="base-footer">
+    <small class="module-copy">Simple Wiki</small>
+</footer>
+<script
+        src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
+<script th:src="@{/js/script_min.js}"></script>
+</body>
+</html>

@@ -2,7 +2,7 @@ server:
   port: 8080
 settings:
   gitUrl: https://github.com/tachikawaYutaka/simple-wiki
-  branch: develop
-  buildCommand: mvnw.cmd
+  branch: master
+  buildCommand: mvnw
   buildWarName: simple-wiki
   buildWarVersion: 0.0.1

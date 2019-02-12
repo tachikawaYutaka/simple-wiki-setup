@@ -24,14 +24,16 @@
 </header>
 <main class="base-main bg-black-4"><div >
     <div class="module-login">
-        <form th:action="@{/login}" method="post">
+        <form th:action="@{/confirm}" method="post">
             <h1>Simple Wiki SetUp</h1>
-            <div class="module-alert true" th:if="${success}">システムの初期設定が完了しました。</div>
             <div class="module-alert" th:if="${error}" th:text="${errorMessage}"></div>
-            <p><input name="userName" placeholder="ID" type="text" class="module-input-text" /></p>
-            <p><input name="userPassword" placeholder="PASSWORD" type="password" class="module-input-text" /></p>
+            <p><input name="mysqlUserName" placeholder="mysql ユーザー名" type="text" class="module-input-text" /></p>
+            <p><input name="mysqlPassword" placeholder="mysql パスワード" type="password" class="module-input-text" /></p>
+            <p><input name="mysqlTable" placeholder="mysql テーブル名" type="text" class="module-input-text" /></p>
+            <p><input name="mysqlHost" placeholder="ホスト" type="text" class="module-input-text" /></p>
+            <p><input name="mysqlPort" placeholder="ポート" type="text" class="module-input-text" /></p>
             <button type="submit" class="module-submit-button">
-                ログイン
+                確認
             </button>
         </form>
     </div>

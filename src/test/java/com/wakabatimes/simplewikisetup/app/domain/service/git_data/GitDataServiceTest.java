@@ -7,6 +7,7 @@ import com.wakabatimes.simplewikisetup.app.domain.model.git_data.GitUrl;
 import com.wakabatimes.simplewikisetup.app.domain.model.git_data.GitUrlComponent;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,7 @@ public class GitDataServiceTest {
     private GitUrlComponent gitUrlComponent;
 
     @Test
+    @Ignore
     public void get(){
         String url = gitUrlComponent.getGitUrl();
         String branch = gitUrlComponent.getBranch();

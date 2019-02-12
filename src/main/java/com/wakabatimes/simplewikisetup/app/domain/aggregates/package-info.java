@@ -1,0 +1,1 @@
+package com.wakabatimes.simplewikisetup.app.domain.aggregates;

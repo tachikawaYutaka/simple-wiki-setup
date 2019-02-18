@@ -30,68 +30,74 @@ public class BuildDataServiceImpl implements BuildDataService{
 
 
         //ymlファイルの置換
-        BufferedReader br = null;
-        BufferedWriter bw = null;
         String ymlPath = repositoryPath + File.separator + "src" + File.separator + "main" + File.separator + "resources" + File.separator + "config" + File.separator + "application.yml";
         try{
-            br = new BufferedReader(new InputStreamReader(new FileInputStream(ymlPath), "UTF8"));
-            bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(ymlPath), "UTF8"));
+            // FileWriterクラスのオブジェクトを生成する
+            FileWriter file = new FileWriter(ymlPath);
+            // PrintWriterクラスのオブジェクトを生成する
+            PrintWriter pw = new PrintWriter(new BufferedWriter(file));
 
-            String line;
-            while((line = br.readLine()) != null){
-                // 置換処理
-                Pattern pattern = Pattern.compile("url:.(.+)");
-                Matcher matcher = pattern.matcher(line);
-                while (matcher.find()) {
-                    line = line.replace(matcher.group(0), "jdbc:mysql://" + mysqlHost+ ":"  + mysqlPort + "/" + mysqlTable + "?serverTimezone=JST");
-                }
+            //ファイルに書き込み
+            pw.println("server:");
+            pw.println("  port: 8080");
+            pw.println("spring:");
+            pw.println("  datasource:");
+            pw.println("    url: jdbc:mysql://" + mysqlHost + "/" + mysqlTable + "?serverTimezone=JST");
+            pw.println("    username: " + mysqlUserName);
+            pw.println("    password: " + mysqlPassword);
+            pw.println("    driverClassName: com.mysql.cj.jdbc.Driver");
+            pw.println("    thymeleaf:");
+            pw.println("      cache: false");
+            pw.println("      mode: HTML");
+            pw.println("mybatis.configuration.mapUnderscoreToCamelCase: true");
 
-                Pattern pattern2 = Pattern.compile("username:.(.+)");
-                Matcher matcher2 = pattern2.matcher(line);
-                while (matcher2.find()) {
-                    line = line.replace(matcher2.group(0), mysqlUserName);
-                }
-
-                Pattern pattern3 = Pattern.compile("password:.(.+)");
-                Matcher matcher3 = pattern3.matcher(line);
-                while (matcher3.find()) {
-                    line = line.replace(matcher3.group(0), mysqlPassword);
-                }
-
-                // ファイルへ書き込み
-                bw.write(line);
-                bw.newLine();
+            //ファイルを閉じる
+            pw.close();
+        } catch(RuntimeException | IOException e){
+            log.error("Error",e);
+            throw new RuntimeException(e.getMessage());
+        }
+        String chmodCommand[] = {"chmod","775",buildCommand};
+        String buildCommandPath = "." + File.separator + buildCommand;
+        String flywayCommand[] = {buildCommandPath,"flyway:migrate","-Dflyway.user=" + mysqlUserName ,"-Dflyway.password=" + mysqlPassword,"-Dflyway.url=jdbc:mysql://" + mysqlHost + ":"  + mysqlPort +"/" + mysqlTable + "?serverTimezone=JST", "-Dflyway.driver=com.mysql.cj.jdbc.Driver","-Dflyway.placeholderReplacement=false"};
+        String packageCommand[]= {buildCommandPath,"package", "-DskipTests=true"};
+        Process pre;
+        Process p;
+        Process p2;
+        Runtime runtime = Runtime.getRuntime();
+        if(buildCommand.equals("mvnw")){
+            try {
+                pre = runtime.exec(chmodCommand, null, repository);
+            } catch (IOException e) {
+                log.error("Error",e);
+                throw new RuntimeException(e.getMessage());
             }
-        } catch(RuntimeException e){
-            log.error("Error",e);
-            throw new RuntimeException(e.getMessage());
-        } catch (IOException e) {
-            log.error("Error",e);
-            throw new RuntimeException(e.getMessage());
-        }finally{
-            if(br != null){
-                try{
-                    br.close();
-                }catch(IOException e){
+
+            try {
+                pre.waitFor();
+            } catch (InterruptedException e) {
+                log.error("Error",e);
+                throw new RuntimeException(e.getMessage());
+            }
+
+            InputStream isPre = pre.getInputStream();
+            BufferedReader brPre = new BufferedReader(new InputStreamReader(isPre)); // テキスト読み込みを行えるようにする
+
+            while (true) {
+                String line;
+                try {
+                    line = brPre.readLine();
+                } catch (IOException e) {
                     log.error("Error",e);
                     throw new RuntimeException(e.getMessage());
                 }
-            }
-            if(bw != null){
-                try{
-                    bw.close();
-                }catch(IOException e){
-                    log.error("Error",e);
-                    throw new RuntimeException(e.getMessage());
+                if (line == null) {
+                    break;
+                } else {
+                    log.info("chmod:" + line);
                 }
             }
         }
-
-        String flywayCommand[] = {buildCommand,"flyway:migrate","-Dflyway.user=" + mysqlUserName ,"-Dflyway.password=" + mysqlPassword,"-Dflyway.url=jdbc:mysql://" + mysqlHost + ":"  + mysqlPort +"/" + mysqlTable + "?serverTimezone=JST", "-Dflyway.driver=com.mysql.cj.jdbc.Driver","-Dflyway.placeholderReplacement=false"};
-        String packageCommand[]= {buildCommand,"clean", "package", "-DskipTests=true"};
-        Process p = null;
-        Process p2 = null;
-        Runtime runtime = Runtime.getRuntime();
 
         try {
             p = runtime.exec(flywayCommand, null, repository);
@@ -111,7 +117,7 @@ public class BuildDataServiceImpl implements BuildDataService{
         BufferedReader br2 = new BufferedReader(new InputStreamReader(is)); // テキスト読み込みを行えるようにする
 
         while (true) {
-            String line = null;
+            String line;
             try {
                 line = br2.readLine();
             } catch (IOException e) {
@@ -142,7 +148,7 @@ public class BuildDataServiceImpl implements BuildDataService{
         BufferedReader br3 = new BufferedReader(new InputStreamReader(is2));
 
         while (true) {
-            String line = null;
+            String line;
             try {
                 line = br3.readLine();
             } catch (IOException e) {
@@ -158,7 +164,6 @@ public class BuildDataServiceImpl implements BuildDataService{
 
         String warPath = repositoryPath + File.separator + "target" + File.separator;
         BuildTargetPath buildTargetPath = new BuildTargetPath(warPath);
-        BuildData buildData1 = new BuildData(buildData.getGitData(),buildData.getMysqlData(),buildData.getBuildCommand(),buildData.getBuildWarFile(),buildTargetPath);
-        return buildData1;
+        return new BuildData(buildData.getGitData(),buildData.getMysqlData(),buildData.getBuildCommand(),buildData.getBuildWarFile(),buildTargetPath);
     }
 }
